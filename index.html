@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Markdown Check</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23121418'/><path d='M25 50 L45 70 L75 30' stroke='%23f5b730' stroke-width='10' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0d;
+  --panel:#121418;
+  --panel2:#181b21;
+  --border:#2a2e38;
+  --border2:#3a4152;
+  --soft:#22262f;
+  --text:#eef1f6;
+  --dim:#a4adbd;
+  --faint:#778092;
+  --accent:#f5b730;
+  --accent2:#ffd166;
+  --danger:#f07063;
+  --ok:#5fbf8f;
+  --sans:"Manrope",system-ui,sans-serif;
+  --mono:"JetBrains Mono",monospace;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; color:var(--text); font:16px/1.6 var(--sans); background:var(--bg);
+  background-image: radial-gradient(1200px 600px at 50% -10%, rgba(245,183,48,0.06), transparent 70%);
+}
+header{
+  max-width:1600px; margin:28px auto 0; padding:24px 32px;
+  display:flex; align-items:center; gap:22px;
+  background:var(--panel);
+  border:1px solid var(--accent);
+  border-radius:20px;
+  position:relative;
+  box-shadow:0 10px 40px -15px #000;
+}
+.logo-check{
+  width:54px; height:54px; border-radius:50%;
+  border:1.5px solid var(--accent);
+  display:grid; place-items:center;
+  color:var(--accent);
+}
+.logo-check svg{width:28px; height:28px; stroke:currentColor; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round}
+.header-text h1{
+  font:800 32px/1.1 var(--sans); margin:0; letter-spacing:-.02em; color:#fff;
+}
+.header-text p{
+  margin:6px 0 0; color:var(--dim); font:500 15px var(--sans);
+}
+.header-star{
+  margin-left:auto; width:36px; height:36px; color:var(--accent);
+}
+.header-star svg{width:100%; height:100%; fill:currentColor}
+
+main{
+  max-width:1600px; margin:24px auto 48px; padding:0 32px;
+  display:grid; grid-template-columns:1.15fr .85fr; gap:24px;
+}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--accent);
+  border-radius:20px;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 20px 50px -30px #000;
+}
+.panelhead{
+  padding:20px 24px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--soft); font:700 18px var(--sans);
+}
+.meta,.count{font:700 13px var(--mono); color:var(--accent); border:1px solid #f5b73066; background:#f5b73015; padding:6px 12px; border-radius:999px}
+.meta.over{color:var(--danger); border-color:var(--danger)}
+
+.toolbar{
+  padding:16px 20px; display:flex; gap:10px; flex-wrap:wrap; border-bottom:1px solid var(--soft);
+}
+button{
+  font:700 14px var(--sans); color:var(--text); background:var(--panel2);
+  border:1px solid var(--border2); border-radius:10px; padding:12px 18px;
+  cursor:pointer; transition:.18s; display:flex; align-items:center; gap:8px;
+}
+button:hover{border-color:var(--accent); color:var(--accent2)}
+button.primary{
+  color:#1a1300; border-color:transparent;
+  background:linear-gradient(145deg,#ffe08a,#f5b730 55%,#d99413);
+  box-shadow:0 8px 24px -10px #f5b730cc;
+}
+button.primary:hover{filter:brightness(1.07); color:#1a1300}
+button svg{width:16px; height:16px; fill:currentColor}
+
+textarea,.preview{
+  flex:1; min-height:560px; padding:22px 26px; border:0; outline:0;
+  background:transparent; color:#dbe0e8; font:14px/1.85 var(--mono);
+  resize:vertical;
+}
+textarea::placeholder{color:#596273}
+.preview{display:none; white-space:pre-wrap; overflow-wrap:anywhere; overflow:auto; background:#0e1014}
+.preview.on{display:block}
+textarea.off{display:none}
+.preview mark{background:#f0706333; color:#ffd9d4; border-bottom:2px solid var(--danger); border-radius:3px; cursor:pointer}
+.preview mark.warn{background:#f5b73026; color:#ffe9b8; border-bottom-color:var(--accent)}
+.preview mark.cur{outline:2px solid var(--accent2); outline-offset:2px}
+
+#results{
+  flex:1; padding:20px; display:flex; flex-direction:column; gap:12px;
+}
+.empty{
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; color:var(--faint); gap:12px; padding:40px 20px;
+}
+.empty svg{width:48px; height:48px; stroke:var(--faint); opacity:0.4}
+.empty strong{color:var(--text); font:700 16px var(--sans)}
+
+.section{font:700 11px var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-top:8px}
+.group{border:1px solid var(--border); border-radius:14px; background:var(--panel2); overflow:hidden; border-left:4px solid var(--danger); margin-bottom:4px}
+.group.warn{border-left-color:var(--accent)}
+.grouphead{padding:14px 18px; display:flex; justify-content:space-between; align-items:center; cursor:pointer}
+.gtitle{font:700 15px var(--sans)}
+.status{font:700 11px var(--mono); padding:5px 10px; border-radius:6px; background:#f0706320; color:var(--danger); border:1px solid #f070634d}
+.group.warn .status{background:#f5b73020; color:var(--accent); border-color:#f5b73059}
+.groupbody{display:none; flex-direction:column; gap:12px; padding:4px 16px 16px 16px}
+.group.open .groupbody{display:flex}
+.gitem pre{margin:0; padding:8px 12px; background:#0e1014; border:1px solid var(--soft); border-left:3px solid var(--border2); border-radius:6px; font:11px/1.5 var(--mono); color:#c8cfda; cursor:pointer; white-space:pre-wrap; overflow-wrap:anywhere}
+.gitem pre:hover{border-color:var(--accent); color:#fff}
+
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2); border-radius:10px}
+
+@media(max-width:900px){ main{grid-template-columns:1fr; padding:0 16px} header{margin:16px; padding:20px} }
+</style></head><body>
+
+<header>
+  <div class="logo-check">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  </div>
+  <div class="header-text">
+    <h1>Markdown Check</h1>
+    <p>Проверьте текст на соответствие редакционной политике</p>
+  </div>
+  <div class="header-star">
+    <svg viewBox="0 0 24 24"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="panelhead">
+      <span>Исходный текст</span>
+      <span class="meta" id="stats">0 / 8000 символов</span>
+    </div>
+    <div class="toolbar">
+      <button class="primary" id="check">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        Проверить текст
+      </button>
+      <button id="paste">Вставить</button>
+      <button id="clear">Очистить</button>
+    </div>
+    <textarea id="input" spellcheck="false" placeholder="Вставьте или напечатайте текст здесь..."></textarea>
+    <div class="preview" id="preview"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panelhead">
+      <span>Замечания</span>
+      <span class="count" id="total">0 замечаний</span>
+    </div>
+    <div id="results">
+      <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        <strong>Готов к проверке</strong>
+        <span>Вставьте текст слева и нажмите «Проверить текст».</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id),input=$('input'),stats=$('stats'),results=$('results'),total=$('total'),preview=$('preview');
+let lines=[],issues=[],activeIdx=-1;
+
+function plural(n){const a=Math.abs(n)%100,b=a%10;if(a>10&&a<20)return n+' замечаний';if(b===1)return n+' замечание';if(b>=2&&b<=4)return n+' замечания';return n+' замечаний'}
+function update(){stats.textContent=input.value.length+' / 8000 символов';stats.classList.toggle('over',input.value.length>8000)}
+function heading(s){return /^ {0,3}#{1,6}\s+/.test(s)}
+function list(s){return /^\s*[-*+]\s+\S/.test(s)}
+function numList(s){return /^\s*\d+[.)]\s+\S/.test(s)}
+function table(s){return /^\s*\|.*\|\s*$/.test(s)}
+function hr(s){return /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/.test(s)}
+function quote(s){return /^\s*>/.test(s)}
+function prev(i){for(let j=i-1;j>=0;j--)if(lines[j].trim())return j;return -1}
+function next(i){for(let j=i+1;j<lines.length;j++)if(lines[j].trim())return j;return -1}
+
+function add(i,id,title,msg,level,excerpt,fix,checkWhat,word){
+ issues.push({line:i+1,id,title,msg,level:level||'error',excerpt:excerpt===undefined?lines[i]:excerpt,fix,checkWhat,word:word||null});
+}
+
+const DOC_KEYWORDS = /(Договор|Акт|Протокол|Приказ|Служебная записка|Доверенность)/i;
+const TRIGGER_WORDS = /^(Важно|Важное предупреждение|Внимание)[!.,:]?/i;
+
+function analyze(text){
+ const cleanText = text.replace(/[\u2028\u2029\u00A0\u200B-\u200D\uFEFF]/g, ' ');
+ lines=cleanText.replace(/\r\n?/g,'\n').split('\n');
+ 
+ issues=[];
+ const isDocument = DOC_KEYWORDS.test(text);
+ const isBusinessLetter = /Тема[:\s.]/i.test(text) && /Уважаемый|Уважаемая/i.test(text);
+
+ lines.forEach((s,i)=>{
+  if(heading(s)){
+   const h=s.replace(/^ {0,3}#{1,6}\s+/,'').replace(/\s+#+\s*$/,'').trim();
+   if(/^ {0,3}#####\s+/.test(s)) add(i,'HD-04','Заголовок 5 уровня','Заголовки 5 уровня не используются.','error',s,'Используйте заголовки от 1 до 4 уровня (# - ####).',null,'#####');
+   if(/[.!?…,:;]$/.test(h))add(i,'HD-01','Пунктуация в конце H-заголовка','Заголовок заканчивается знаком препинания.','error',s,'Уберите знак препинания в конце заголовка.',null,h.slice(-1));
+   if(/\*\*|__/.test(h))add(i,'HD-02','Bold внутри H-заголовка','Внутри H-заголовка использовано жирное выделение.','error',s,'Уберите bold внутри заголовка.',null,'**');
+   if(i+1<lines.length&&lines[i+1].trim())add(i,'HD-03','Нет пустой строки после заголовка','После H-заголовка сразу идёт текст.','error',s,'Оставьте пустую строку между заголовком и текстом.',null,'\n');
+   if(/\$/.test(h))add(i,'LX-01','LaTeX в заголовке','В H-заголовке использован LaTeX.','error',s,'Уберите LaTeX из заголовка.',null,'$');
+  }
+  
+  if(/^\s*\*\*\*\s*$/.test(s)||/^\s*___+\s*$/.test(s))add(i,'HR-01','Неподходящий разделитель','Использован разделитель, отличный от ---.','error',s,'Замените разделитель на три дефиса: ---.',null,'***');
+  if(/[ \t]+$/.test(s)&&s.length)add(i,'SP-01','Пробелы в конце строки','В конце строки есть пробелы или табуляция.','error',s,'Удалите пробелы в конце строки.',null,'[ \t]+$');
+  if(/ {2,}/.test(s.trim()))add(i,'SP-02','Лишние пробелы','Между элементами строки два и больше пробелов.','error',s,'Оставьте один пробел.',null,s.match(/ {2,}/)[0]);
+  
+  const latexMatch = s.match(/\$(.+?)\$/g);
+  if(latexMatch) {
+    latexMatch.forEach(m => {
+      if(/\s[-+*/=<>]\s/.test(m)) add(i, 'LX-03', 'Пробелы внутри LaTeX', 'Внутри формул не должно быть пробелов между знаками и числами.', 'error', s, 'Уберите лишние пробелы внутри формулы.', null, m);
+    });
+  }
+
+  if(list(s)) {
+    const p = prev(i);
+    if(p>=0 && numList(lines[p])) {
+      add(i,'LS-07','Вложенный маркированный список','Маркированный список вложен в нумерованный.','error',s,'Проверьте структуру вложенности списка.',null,'-');
+    }
+  }
+
+  if(/^\s*\*\s+\S/.test(s))add(i,'LS-01','Звёздочка вместо дефиса в пункте списка','Пункт списка оформлен звёздочкой.','error',s,'Замените * на - в начале пункта.',null,'*');
+  if(/^\s*\+\s+\S/.test(s))add(i,'LS-02','Неподдерживаемый маркер списка','Пункт списка оформлен плюсом.','error',s,'Замените + на -.',null,'+');
+  
+  if(list(s)){
+   if(/^\s+[-*+]\s+/.test(s))add(i,'LS-03','Отступ перед пунктом списка','Перед маркером списка есть лишний отступ.','error',s,'Уберите отступ перед маркером.',null,s.match(/^\s+/)[0]);
+  }
+
+  if(table(s)){
+   const cells=s.trim().replace(/^\|/,'').replace(/\|$/,'').split('|'),sep=cells.every(c=>/^\s*:?-{3,}:?\s*$/.test(c));
+   if(!sep)cells.forEach(c=>{
+    if(!c.trim())add(i,'TB-01','Пустая ячейка таблицы','В таблице есть незаполненная ячейка.','warn',s,'Заполните ячейку или поставьте длинное тире / «нет данных» / «неизвестно».',' ',' ');
+    if(/[ \t]{2,}/.test(c))add(i,'TB-02','Лишние пробелы в таблице','Внутри ячейки повторяются пробелы.','warn',s,'Уберите повторяющиеся пробелы.',' ',' ');
+    if(/[.…,:;]\s*$/.test(c.trim())) add(i,'TB-03','Пунктуация в конце ячейки','В конце содержимого ячейки конечную пунктуацию не ставим.','error',s,'Уберите знак препинания в конце ячейки.',null,c.trim().match(/[.…,:;]$/)[0]);
+    if(/\*\*|__/.test(c)) add(i,'TB-06','Возможно, лишний болд в таблице','В ячейке таблицы использован болд. Чаще всего это перебор с выделением.','warn',s,'Проверьте, уместно ли здесь жирное выделение.',null,'**');
+   });
+   if(!sep&&/<br\s*\/?>/i.test(s))add(i,'TB-04','HTML-перенос внутри таблицы','В таблице использован тег <br>.','error',s,'Уберите <br> из таблицы.',null,'<br>');
+   if(!sep){const p=prev(i);if(p>=0&&!table(lines[p])&&!hr(lines[p])&&!heading(lines[p])&&!/[.!?…]\s*$/.test(lines[p].trim())){
+     const isColon=/:\s*$/.test(lines[p].trim());
+     add(p,'TB-05','Пунктуация перед таблицей','Текст перед таблицей должен завершаться точкой; двоеточие не подходит.',isColon?'error':'warn',lines[p],'Завершите предложение перед таблицей точкой.',null,isColon?':':lines[p].slice(-1));
+   }}
+  }
+
+  if(/^\s*\$\$/.test(s)&&i>0&&/:\s*$/.test(lines[i-1].trim()))add(i,'LX-02','Двоеточие перед блочной формулой','Перед блочной формулой стоит двоеточие.','warn',lines[i-1]+'\n'+s,'Завершите предложение перед формулой точкой.',null,':');
+  
+  if(quote(s)){
+   const q=s.replace(/^\s*>\s?/,'');
+   if(/["“”«»„‟]/.test(q))add(i,'QT-01','Кавычки внутри цитаты','Внутри Markdown-цитаты есть кавычки.','error',s,'Уберите кавычки внутри цитаты.',null,q.match(/["“”«»„‟]/)[0]);
+   if(/\*\*|__|(?<!\*)\*(?!\*)|(?<!_)_(?!_)/.test(q))add(i,'QT-02','Выделение внутри цитаты','Внутри цитаты использован bold или italic.','error',s,'Уберите выделение внутри цитаты.',null,'**');
+  }
+
+  if(TRIGGER_WORDS.test(s.trim()) && !quote(s)){
+    add(i,'QT-03','Возможно, нужна цитата','Текст начинается со слова-триггера (например, «Важно»). Возможно, его стоит оформить как цитату через >.','warn',s,'Проверьте, не нужно ли выделить этот блок цитатой.',null,'Важно');
+  }
+
+  if (isBusinessLetter) {
+    const themeMatch = s.match(/^\*\*Тема[.:]?\*\*\s*(.+)$/i);
+    if (themeMatch) {
+      let themeText = themeMatch[1].trim();
+      if (!/^_.*_\.?$/.test(themeText) || /\.$/.test(themeText.replace(/_/g,''))) {
+         add(i,'DOC-02','Оформление темы письма','Слово «Тема» выделяем болдом, саму тему — курсивом, без точки в конце.','error',s,'Оформите так: **Тема:** _Текст темы_',null,themeText);
+      }
+    }
+  }
+
+  const startBoldMatch = s.match(/^\s*(\*\*(.+?)\*\*|__(.+?)__)(.*)$/);
+  if (startBoldMatch) {
+    const fullPhrase = startBoldMatch[2] || startBoldMatch[3];
+    const restOfLine = startBoldMatch[4];
+    const phraseText = fullPhrase.trim();
+    
+    if (restOfLine.trim() !== '' && !isDocument) {
+       if (/\.[!?…]?$/.test(phraseText)) {
+       } else if (/:$/.test(phraseText)) {
+          if (/^[А-ЯЁ]/.test(restOfLine.trim())) {
+             add(i, 'BD-13', 'Заглавная буква после двоеточия', 'После двоеточия текст должен начинаться со строчной буквы.', 'error', s, 'Измените первую букву текста после болда на строчную.', null, restOfLine.trim().charAt(0));
+          }
+       } else if (!/[.\-–—]$/.test(phraseText)) {
+          add(i, 'BD-12', 'Нет пунктуации в конце болда', 'Болд-заголовок должен заканчиваться двоеточием или точкой.', 'error', s, 'Добавьте двоеточие или точку в конце болда.', null, phraseText);
+       }
+    }
+  }
+
+  // Проверка самостоятельного bold: отличаем висячий bold от
+  // подводки к списку и от inline-подзаголовка подборки.
+  const standaloneBold = s.match(/^\s*(\*\*(.+?)\*\*|__(.+?)__)\s*$/);
+  if (standaloneBold) {
+    const inner = (standaloneBold[2] || standaloneBold[3] || '').trim();
+    const immediateNext = i + 1 < lines.length ? lines[i + 1] : '';
+    const nextNonEmpty = next(i);
+    const immediateIsList = immediateNext.trim() !== '' &&
+      (list(immediateNext) || numList(immediateNext));
+    const nextIsList = nextNonEmpty >= 0 &&
+      (list(lines[nextNonEmpty]) || numList(lines[nextNonEmpty]));
+    const nextIsOrdinaryText = nextNonEmpty >= 0 &&
+      !list(lines[nextNonEmpty]) &&
+      !numList(lines[nextNonEmpty]) &&
+      !table(lines[nextNonEmpty]) &&
+      !heading(lines[nextNonEmpty]) &&
+      !quote(lines[nextNonEmpty]);
+
+    // Подводка с двоеточием перед списком допустима, но список
+    // обязательно должен отделяться от неё пустой строкой.
+    if (inner.endsWith(':') && nextIsList && immediateIsList) {
+      add(
+        i,
+        'BD-20',
+        'Нет пустой строки после подводки',
+        'После bold-подводки перед списком должна быть пустая строка.',
+        'error',
+        s + '\n' + immediateNext,
+        'Добавьте пустую строку между подводкой и первым пунктом списка.',
+        null,
+        inner
+      );
+    }
+
+    // Самостоятельный bold, после которого идёт обычный текст,
+    // считается висячим независимо от конечной пунктуации.
+    // Inline-подзаголовки сюда не попадают: у них есть текст на той же строке.
+    if (!nextIsList && nextIsOrdinaryText) {
+      add(
+        i,
+        'BD-16',
+        'Висячий болд',
+        'Самостоятельный bold отделён переносом строки от обычного текста. Такой фрагмент не должен использоваться как отдельный подзаголовок.',
+        'error',
+        s + '\n' + lines[nextNonEmpty],
+        'Объедините выделенный фрагмент с последующим текстом на одной строке либо оформите его как настоящий H-заголовок.',
+        null,
+        inner
+      );
+    }
+  }  
+  if(/(^|[^*])\*(?!\*)([^*\n]+?)\*(?!\*)/.test(s))add(i,'IT-01','Курсив через звёздочки','Курсив оформлен звёздочками.','error',s,'Оформите курсив нижним подчёркиванием: _текст_.',null,s.match(/(^|[^*])\*(?!\*)([^*\n]+?)\*(?!\*)/)[0]);
+  
+  if(/(^|[^_])_\s*["“”«»„‟].+?["“”«»„‟]\s*_(?!_)/.test(s)) {
+     add(i,'IT-02','Курсив вместе с кавычками','Кавычки внутри курсива.','error',s,'Оставьте что-то одно: курсив или кавычки.',null,s.match(/(^|[^_])_\s*["“”«»„‟].+?["“”«»„‟]\s*_(?!_)/)[0]);
+  }
+ });
+
+ lines.forEach((s,i)=>{
+    if(i>0 && i<lines.length-1) {
+       if(s.trim() && lines[i-1].trim() && !list(s) && !list(lines[i-1]) && !numList(s) && !numList(lines[i-1]) && !table(s) && !table(lines[i-1]) && !heading(s) && !heading(lines[i-1])) {
+          const isPrevBold = /^\s*(\*\*(.+?)\*\*|__(.+?)__)/.test(lines[i-1]);
+          const isCurrentBold = /^\s*(\*\*(.+?)\*\*|__(.+?)__)/.test(s);
+          const isQuote = quote(s) && quote(lines[i-1]);
+          
+          const endsWithPunct = /[.!?…:]\s*$/.test(lines[i-1].trim());
+          const startsWithUpper = /^[А-ЯЁA-Z]/.test(s.trim()) || list(s) || numList(s);
+          
+          const isListIntro = endsWithPunct && /:\s*$/.test(lines[i-1].trim()) && (list(s) || numList(s));
+
+          if (!isPrevBold && !isCurrentBold && !isQuote && endsWithPunct && startsWithUpper && !isListIntro) {
+             const highlightWord = lines[i-1].trim().slice(-20);
+             add(i-1,'AB-01','Нет пустой строки между абзацами','Абзацы должны разделяться пустой строкой.','error',lines[i-1],'Добавьте пустую строку между абзацами.',null,highlightWord);
+          }
+       }
+    }
+ });
+
+ lines.forEach((s,i)=>{
+   if(!s.trim()){
+     const p=prev(i),n=next(i);
+     if(p>=0&&n>=0 && (list(lines[p])||numList(lines[p])) && (list(lines[n])||numList(lines[n]))){
+       add(i,'LS-05','Пустая строка между пунктами списка','Пустая строка разделяет пункты одного списка.','error','(пустая строка)','Удалите пустую строку между пунктами.');
+     }
+   }
+ });
+ 
+ lines.forEach((s,i)=>{
+   if(!s.trim() && i>0 && !lines[i-1].trim()) {
+     add(i,'AB-02','Лишние пустые строки','Между абзацами больше одной пустой строки.','error','(пустые строки подряд)','Оставьте только одну пустую строку между абзацами.');
+   }
+ });
+
+ let inList=false, listItems=[];
+ lines.forEach((s,i)=>{
+   if(list(s)){inList=true;listItems.push({s,i})}
+   else if(!s.trim()&&inList){}
+   else if(s.trim()&&!list(s)&&inList){
+     if(listItems.length>1){
+       let hasBold = false, hasNoBold = false;
+       listItems.forEach(li=>{
+         const m = li.s.match(/^\s*[-*+]\s+(\*\*.+?\*\*|__.+?__)/);
+         if(m) hasBold = true;
+         else hasNoBold = true;
+       });
+       if(hasBold && hasNoBold){
+         listItems.forEach(li=>{
+           const m = li.s.match(/^\s*[-*+]\s+(\*\*.+?\*\*|__.+?__)/);
+           if(!m) add(li.i,'LS-06','Единообразие в списке','В этом списке у других пунктов есть болд-заголовок, а здесь его нет.','warn',li.s,'Добавьте болд-заголовок или уберите его у других пунктов.',null, li.s.trim().slice(0, 15));
+         });
+       }
+     }
+     inList=false;listItems=[];
+   }
+ });
+ if(inList&&listItems.length>1){
+   let hasBold = false, hasNoBold = false;
+   listItems.forEach(li=>{
+     const m = li.s.match(/^\s*[-*+]\s+(\*\*.+?\*\*|__.+?__)/);
+     if(m) hasBold = true;
+     else hasNoBold = true;
+   });
+   if(hasBold && hasNoBold){
+     listItems.forEach(li=>{
+       const m = li.s.match(/^\s*[-*+]\s+(\*\*.+?\*\*|__.+?__)/);
+       if(!m) add(li.i,'LS-06','Единообразие в списке','В этом списке у других пунктов есть болд-заголовок, а здесь его нет.','warn',li.s,'Добавьте болд-заголовок или уберите его у других пунктов.',null, li.s.trim().slice(0, 15));
+     });
+   }
+ }
+
+ let singleListFlag = false;
+ lines.forEach((s,i)=>{
+    if(list(s) || numList(s)) {
+        if(!singleListFlag) {
+           const n = next(i);
+           if(n<0 || (!list(lines[n]) && !numList(lines[n]))) {
+               add(i,'LS-08','Список из одного пункта','Список не может состоять из одного пункта.','error',s,'Либо добавьте пункты в список, либо оформите как обычный текст.',null,'-');
+           }
+           singleListFlag = true;
+        }
+    } else if (s.trim()) {
+        singleListFlag = false;
+    }
+ });
+
+ lines.forEach((s,i)=>{if(heading(s)){const p=prev(i);if(p>=0&&hr(lines[p]))add(p,'HR-02','Разделитель перед H-заголовком','Перед H-заголовком стоит разделитель.','warn',lines[p]+'\n'+s,'Проверьте, нужен ли разделитель в этом месте.')}});
+ 
+ if(isBusinessLetter && !issues.some(x=>x.title.includes('деловых'))) {
+   issues.push({line:1,id:'DOC-01',title:'Памятка по деловым письмам',msg:'Текст похож на деловое письмо. Убедитесь, что реквизиты и обращение оформлены болдом, а тема письма — курсивом.',level:'warn',excerpt:'Проверьте оформление по памятке «Оформление деловых писем».',word:null});
+ }
+
+ issues.sort((a,b)=>a.line-b.line);
+ return issues;
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function buildPreview(){
+ const byLine={};
+ issues.forEach((x,idx)=>{(byLine[x.line-1]=byLine[x.line-1]||[]).push({...x,idx})});
+ let html='';
+ 
+ lines.forEach((s,i)=>{
+  const hits=byLine[i];
+  if(!hits || !s.trim()) {
+    html += esc(s) + (i<lines.length-1?'\n':'');
+    return;
+  }
+  
+  let marks = [];
+  hits.forEach(h => {
+    if(h.word === '[ \t]+$') {
+       const match = s.match(/[ \t]+$/);
+       if(match) marks.push({ start: s.length - match[0].length, end: s.length, idx: h.idx, title: h.title, warn: h.level==='warn' });
+       return;
+    }
+    
+    if(h.word) {
+      let pos = -1;
+      if (h.id === 'LS-01' || h.id === 'LS-02') {
+         pos = s.indexOf(h.word);
+      } else {
+         pos = s.lastIndexOf(h.word);
+         if (pos === -1) pos = s.indexOf(h.word);
+      }
+      
+      if(pos !== -1) {
+        marks.push({ start: pos, end: pos + h.word.length, idx: h.idx, title: h.title, warn: h.level==='warn' });
+      } else {
+        marks.push({ start: 0, end: s.length, idx: h.idx, title: h.title, warn: h.level==='warn' });
+      }
+    } else {
+       marks.push({ start: 0, end: s.length, idx: h.idx, title: h.title, warn: h.level==='warn' });
+    }
+  });
+  
+  marks.sort((a,b) => a.start - b.start);
+  
+  let out = '';
+  let lastPos = 0;
+  marks.forEach(m => {
+    if(m.start < lastPos) m.start = lastPos;
+    if(m.start >= s.length) m.start = Math.max(0, s.length - 1);
+    if(m.end > s.length) m.end = s.length;
+    
+    out += esc(s.slice(lastPos, m.start));
+    if(m.start < m.end) {
+      out += '<mark class="'+(m.warn?'warn':'')+'" data-idx="'+m.idx+'" title="'+esc(m.title)+'">' + esc(s.slice(m.start, m.end)) + '</mark>';
+    }
+    lastPos = m.end;
+  });
+  out += esc(s.slice(lastPos));
+  
+  html += out + (i<lines.length-1?'\n':'');
+ });
+ 
+ preview.innerHTML=html;
+ preview.querySelectorAll('mark').forEach(m=>m.addEventListener('click',()=>focusIssue(+m.dataset.idx)));
+}
+
+function focusIssue(idx){
+ activeIdx=idx;
+ const m=preview.querySelector('mark[data-idx="'+idx+'"]');
+ if(m){const group=m.closest('.group');if(group && !group.classList.contains('open'))group.classList.add('open');}
+ const panel=preview.closest('.panel');
+ if(panel)panel.scrollIntoView({behavior:'smooth', block:'center'});
+ setTimeout(()=>{if(m){preview.querySelectorAll('mark').forEach(el=>el.classList.remove('cur'));m.classList.add('cur');m.scrollIntoView({block:'center', behavior:'smooth'});}}, 200);
+}
+
+function render(){
+ total.textContent=plural(issues.length);
+ if(!issues.length){
+  results.innerHTML='<div class="empty"><strong>Замечаний не найдено</strong></div>';
+  preview.classList.remove('on');input.classList.remove('off');return;
+ }
+ results.innerHTML='';
+ const groups=[];
+ issues.forEach((x,idx)=>{
+  let g=groups.find(o=>o.id===x.id);
+  if(!g){g={id:x.id,title:x.title,level:x.level,msg:x.msg,fix:x.fix,checkWhat:x.checkWhat,items:[]};groups.push(g)}
+  g.items.push({idx,excerpt:x.excerpt,word:x.word});
+ });
+ groups.sort((a,b)=>a.items[0].idx-b.items[0].idx);
+ const errors=groups.filter(g=>g.level!=='warn'),warns=groups.filter(g=>g.level==='warn');
+ if(errors.length){results.insertAdjacentHTML('beforeend','<div class="section">Ошибки</div>');errors.forEach(g=>results.append(buildGroup(g)))}
+ if(warns.length){results.insertAdjacentHTML('beforeend','<div class="section">Возможно ошибка</div>');warns.forEach(g=>results.append(buildGroup(g)))}
+ buildPreview();preview.classList.add('on');input.classList.add('off');
+}
+
+function buildGroup(g){
+ const card=document.createElement('article');
+ card.className='group '+(g.level==='warn'?'warn':'');
+ const head=document.createElement('div');
+ head.className='grouphead';
+ head.innerHTML='<span class="gtitle">'+esc(g.title)+'</span><span class="status">'+(g.level==='warn'?'возможно ошибка':'ошибка')+' ×'+g.items.length+'</span>';
+ card.append(head);
+ const body=document.createElement('div');
+ body.className='groupbody';
+ g.items.forEach(it=>{
+  const row=document.createElement('div');
+  row.className='gitem';
+  
+  let displayText = it.excerpt || '(пустая строка)';
+  if (it.word && it.excerpt) {
+    if(it.word === '[ \t]+$') {
+       displayText = '...' + it.excerpt + '(пробелы)';
+     } else {
+       let pos = -1;
+       if (it.id === 'LS-01' || it.id === 'LS-02') {
+          pos = it.excerpt.indexOf(it.word);
+       } else {
+          pos = it.excerpt.lastIndexOf(it.word);
+          if (pos === -1) pos = it.excerpt.indexOf(it.word);
+       }
+       
+       if (pos !== -1) {
+         const start = Math.max(0, pos - 20);
+         const end = Math.min(it.excerpt.length, pos + it.word.length + 20);
+         displayText = (start > 0 ? '...' : '') + it.excerpt.slice(start, end) + (end < it.excerpt.length ? '...' : '');
+       }
+    }
+  }
+  
+  row.innerHTML='<pre>'+esc(displayText)+'</pre>';
+  row.addEventListener('click',e=>{e.stopPropagation();focusIssue(it.idx)});
+  body.append(row);
+ });
+ card.append(body);
+ head.addEventListener('click',()=>card.classList.toggle('open'));
+ if(!document.querySelector('.group.open'))card.classList.add('open');
+ return card;
+}
+
+function check(){analyze(input.value);render()}
+
+$('check').addEventListener('click',check);
+$('clear').addEventListener('click',()=>{input.value='';preview.innerHTML='';preview.classList.remove('on');input.classList.remove('off');update();total.textContent='0 замечаний';results.innerHTML='<div class="empty"><strong>Готов к проверке</strong><span>Вставьте текст слева и нажмите «Проверить текст».</span></div>';});
+$('paste').addEventListener('click',async()=>{try{if(!navigator.clipboard?.readText)throw 0;const t=await navigator.clipboard.readText();input.setRangeText(t,input.selectionStart,input.selectionEnd,'end');input.focus();update()}catch(e){alert('Буфер недоступен: используйте Ctrl+V или Cmd+V в поле текста');input.focus()}});
+input.addEventListener('input',update);update();
+})();
+</script>
+</body>
+</html>
